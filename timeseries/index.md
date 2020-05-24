@@ -1,5 +1,5 @@
 ---
-title: Time Series Composition
+title: Time Series Deomposition
 description: Course Content
 ---
 
