@@ -3,7 +3,7 @@ title: My GitHub Page
 description: A space to store course related materials from my OMSBA program
 ---
 
-![My Picture](/pics/College-of-William-and-Mary.jpg=250x250)
+![My Picture](/pics/College-of-William-and-Mary.jpg)
 
 This is content developed for my CTBA course at The College of William and Mary.
 
