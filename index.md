@@ -5,6 +5,9 @@ description: Just starting out
 
 ![My Picture](/pics/College-of-William-and-Mary.jpg)
 
-This is content developed for my CTBA course.
+This is content developed for my CTBA course at The College of William and Mary.
 
 [Time Series Decomposition](/timeseries/index.md)
+
+Link to sample repository:
+- [Sample Repository](https://github.com/ddg885/sample)
