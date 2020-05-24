@@ -1,5 +1,7 @@
 ---
+
 Title: Time Series Composition
+
 description: Course Content
 ---
 
