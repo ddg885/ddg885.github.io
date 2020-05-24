@@ -3,7 +3,7 @@ title: My page
 description: Just starting out
 ---
 
-![My Picture](/pics/College-of-William-and-Mary.jpg)
+![My Picture](/pics/College-of-William-and-Mary.jpg=250x250)
 
 This is content developed for my CTBA course at The College of William and Mary.
 
