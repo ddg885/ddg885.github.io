@@ -1,5 +1,5 @@
 ---
-title: Time Series Deomposition
+title: Time Series Decomposition
 description: Course Content
 ---
 
