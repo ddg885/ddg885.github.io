@@ -1,6 +1,6 @@
 ---
-title: My page
-description: Just starting out
+title: Time Series Composition
+description: Course Content
 ---
 
 Here is a Time Series Decomposition I used in my CTBA course
