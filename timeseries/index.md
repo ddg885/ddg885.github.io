@@ -1,7 +1,6 @@
 ---
 
-Title: Time Series Composition
-
+title: Time Series Composition
 description: Course Content
 ---
 
