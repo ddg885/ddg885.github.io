@@ -1,6 +1,6 @@
 ---
-title: My page
-description: Just starting out
+title: My GitHub Page
+description: A space to store course related materials from my OMSBA program
 ---
 
 ![My Picture](/pics/College-of-William-and-Mary.jpg=250x250)
