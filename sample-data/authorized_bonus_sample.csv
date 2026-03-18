@@ -1,0 +1,7 @@
+FY,Category,Budget Line Item,O/E,Bonus Type,Amount,Installment Structure,Effective Date,Expiration Date,Line Identifier,Bonus Identifier
+2026,Aviation,Pilot Retention,O,Flight,50000,Initial + Anniversary,2025-10-01,2026-09-30,LINE-100,BONUS-100
+2026,Aviation,Pilot Accession,O,Accession,30000,Lump Sum,2025-10-01,2026-09-30,LINE-101,BONUS-101
+2026,Cyber,Cyber Enlistment,E,Enlistment,20000,Initial + Multiple Anniversary,2025-10-01,2026-09-30,LINE-200,BONUS-200
+2026,Medical,Medical Retention,O,Retention,40000,Initial + Anniversary,2025-10-01,2026-09-30,LINE-300,BONUS-300
+2026,Aviation,Pilot Retention,O,Flight,50000,Initial + Anniversary,2025-10-01,2026-09-30,LINE-100,BONUS-100
+2027,Cyber,Cyber Enlistment,E,Enlistment,21000,Unknown,2026-10-01,2027-09-30,LINE-201,BONUS-201

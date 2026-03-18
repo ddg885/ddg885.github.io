@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bonus Ecosystem Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.5/dist/css/tabulator.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-eyebrow">Financial Planning MVP</div>
+        <div id="app-title" class="brand-title">Bonus Ecosystem Platform</div>
+      </div>
+      <nav id="sidebar-nav" class="sidebar-nav"></nav>
+    </aside>
+
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="readiness-summary">
+            <span class="label">Model Readiness</span>
+            <span id="model-readiness-badge" class="badge negative">Not Ready</span>
+          </div>
+          <div id="last-rebuild" class="last-rebuild">Latest rebuild: not yet run</div>
+        </div>
+        <div class="topbar-right">
+          <label>
+            Fiscal Year
+            <select id="fy-filter"></select>
+          </label>
+          <label>
+            Category
+            <select id="category-filter"></select>
+          </label>
+          <label>
+            O/E
+            <select id="oe-filter"></select>
+          </label>
+          <label>
+            Bonus Type
+            <select id="bonus-type-filter"></select>
+          </label>
+          <label>
+            Status
+            <select id="status-filter"></select>
+          </label>
+          <button id="rebuild-model-btn" class="primary-btn">Rebuild Model</button>
+          <button id="clear-state-btn" class="secondary-btn danger-btn">Clear Saved State</button>
+          <button id="export-view-btn" class="secondary-btn">Export Current View</button>
+        </div>
+      </header>
+
+      <section class="intake-toolbar">
+        <div>
+          <label>
+            Source Type
+            <select id="source-type-selector"></select>
+          </label>
+          <input id="file-upload-input" type="file" multiple accept=".csv,.xlsx,.xls" />
+        </div>
+        <div class="intake-toolbar-actions">
+          <button id="load-samples-btn" class="secondary-btn">Reload Bundled Samples</button>
+          <span class="subtle">Works as static browser files. Bundled samples auto-load when no saved state exists.</span>
+        </div>
+      </section>
+
+      <section id="page-content" class="page-container"></section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.5/dist/js/tabulator.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

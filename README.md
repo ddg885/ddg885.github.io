@@ -1,109 +1,316 @@
-# The Tactile theme
+# Bonus Ecosystem Platform
 
-[![Build Status](https://travis-ci.org/pages-themes/tactile.svg?branch=master)](https://travis-ci.org/pages-themes/tactile) [![Gem Version](https://badge.fury.io/rb/jekyll-theme-tactile.svg)](https://badge.fury.io/rb/jekyll-theme-tactile)
+## Purpose
 
-*Tactile is a Jekyll theme for GitHub Pages. You can [preview the theme to see what it looks like](http://pages-themes.github.io/tactile), or even [use it today](#usage).*
+Bonus Ecosystem Platform is a browser-based HTML/CSS/JavaScript MVP for bonus program planning and execution analysis. It ingests source files, validates and normalizes them, applies reference-table-driven mappings, links authorization to budgets and approvals, calculates obligations and payout schedules, models projected bonus activity, and presents both executive and analyst views.
 
-![Thumbnail of Tactile](thumbnail.png)
+The MVP prioritizes calculation integrity, traceability, validation, and warning visibility over visual polish.
 
-## Usage
+## File Structure
 
-To use the Tactile theme:
-
-1. Add the following to your site's `_config.yml`:
-
-    ```yml
-    theme: jekyll-theme-tactile
-    ```
-
-2. Optionally, if you'd like to preview your site on your computer, add the following to your site's `Gemfile`:
-
-    ```ruby
-    gem "github-pages", group: :jekyll_plugins
-    ```
-
-## Customizing
-
-### Configuration variables
-
-Tactile will respect the following variables, if set in your site's `_config.yml`:
-
-```yml
-title: [The title of your site]
-description: [A short description of your site's purpose]
+```text
+/index.html
+/styles.css
+/app.js
+/modules/constants.js
+/modules/utils.js
+/modules/data-loader.js
+/modules/validation-engine.js
+/modules/reference-manager.js
+/modules/mapping-engine.js
+/modules/authorization-engine.js
+/modules/planning-engine.js
+/modules/allocation-engine.js
+/modules/obligation-engine.js
+/modules/payout-engine.js
+/modules/execution-engine.js
+/modules/dashboard-renderer.js
+/modules/storage-manager.js
+/modules/export-manager.js
+/sample-data/authorized_bonus_sample.csv
+/sample-data/approval_execution_sample.csv
+/sample-data/budget_sample.csv
+/sample-data/reference_crosswalk_sample.csv
+/sample-data/assumptions_sample.csv
+/README.md
 ```
 
-Additionally, you may choose to set the following optional variables:
+## How to Run Locally
 
-```yml
-show_downloads: ["true" or "false" to indicate whether to provide a download URL]
-google_analytics: [Your Google Analytics tracking ID]
+### Option 1: Open directly
+1. Open `index.html` in a modern browser.
+2. Bundled sample data auto-loads if no saved state exists.
+3. If your browser restricts module or file access under `file://`, use Option 2.
+
+### Option 2: Serve statically
+Run a simple local static server from the repo root, for example:
+
+```bash
+python3 -m http.server 8000
 ```
 
-### Stylesheet
+Then open `http://localhost:8000`.
 
-If you'd like to add your own custom styles:
+## Supported Source Types
 
-1. Create a file called `/assets/css/style.scss` in your site
-2. Add the following content to the top of the file, exactly as shown:
-    ```scss
-    ---
-    ---
+### Required to build the model
+- Authorized Bonus Source
+- Approval / Execution Source
+- Budget Source
+- Reference / Crosswalk Source
 
-    @import "{{ site.theme }}";
-    ```
-3. Add any custom CSS (or Sass, including imports) you'd like immediately after the `@import` line
+### Optional in the MVP
+- Assumptions Source
+- Personnel / Population Source is recognized conceptually but does not drive MVP outputs.
 
-*Note: If you'd like to change the theme's Sass variables, you must set new values before the `@import` line in your stylesheet.*
+If the assumptions source is missing, the app seeds default assumption rows in the UI and model logic.
 
-### Layouts
+## Required and Optional Columns
 
-If you'd like to change the theme's HTML layout:
+The app resolves logical fields using accepted aliases.
 
-1. [Copy the original template](https://github.com/pages-themes/tactile/blob/master/_layouts/default.html) from the theme's repository<br />(*Pro-tip: click "raw" to make copying easier*)
-2. Create a file called `/_layouts/default.html` in your site
-3. Paste the default layout content copied in the first step
-4. Customize the layout as you'd like
+### 1. Authorized Bonus Source
+Required logical fields:
+- FY
+- Category
+- Budget Line Item
+- O/E
+- Bonus Type
+- Amount
+- Installment Structure
+- Effective Date
 
-### Overriding GitHub-generated URLs
+Optional:
+- Expiration Date
+- Line Identifier
+- Bonus Identifier
 
-Templates often rely on URLs supplied by GitHub such as links to your repository or links to download your project. If you'd like to override one or more default URLs:
+### 2. Approval / Execution Source
+Required logical fields:
+- Member ID or Record Key
+- Status
+- Approval Date
+- Amount
 
-1. Look at [the template source](https://github.com/pages-themes/tactile/blob/master/_layouts/default.html) to determine the name of the variable. It will be in the form of `{{ site.github.zip_url }}`.
-2. Specify the URL that you'd like the template to use in your site's `_config.yml`. For example, if the variable was `site.github.url`, you'd add the following:
-    ```yml
-    github:
-      zip_url: http://example.com/download.zip
-      another_url: another value
-    ```
-3. When your site is built, Jekyll will use the URL you specified, rather than the default one provided by GitHub.
+Optional:
+- Bonus Identifier
+- Category
+- Budget Line Item
+- O/E
+- Bonus Type
+- Installment Count
+- Initial Amount
+- Obligation Date
+- Payment Date
+- Cancellation Date
+- Line Identifier
 
-*Note: You must remove the `site.` prefix, and each variable name (after the `github.`) should be indent with two space below `github:`.*
+### 3. Budget Source
+Required logical fields:
+- FY
+- Budget Line Item
+- Category
+- O/E
+- Bonus Type
+- Amount
 
-For more information, see [the Jekyll variables documentation](https://jekyllrb.com/docs/variables/).
+### 4. Reference / Crosswalk Source
+Required logical fields:
+- Reference Type
+- Raw Value
+- Standard Value
+- Active Flag
 
-## Roadmap
+Optional:
+- Effective Date
+- Expiration Date
+- Notes
 
-See the [open issues](https://github.com/pages-themes/tactile/issues) for a list of proposed features (and known issues).
+### 5. Assumptions Source
+Required logical fields:
+- FY
+- Category
 
-## Project philosophy
+Optional:
+- Target Avg Initial Bonus
+- Planned Need
+- Take Rate
+- Priority Rank
+- Distribution Rule
+- Notes
 
-The Tactile theme is intended to make it quick and easy for GitHub Pages users to create their first (or 100th) website. The theme should meet the vast majority of users' needs out of the box, erring on the side of simplicity rather than flexibility, and provide users the opportunity to opt-in to additional complexity if they have specific needs or wish to further customize their experience (such as adding custom CSS or modifying the default layout). It should also look great, but that goes without saying.
+## Alias Handling
 
-## Contributing
+Each source type is validated against exact logical field requirements, but physical column names can use accepted aliases. The app:
+- resolves aliases centrally,
+- flags missing required logical fields,
+- flags duplicate column mappings,
+- preserves raw values,
+- stores normalized values separately,
+- keeps validation errors on each normalized row,
+- never overwrites uploaded raw data.
 
-Interested in contributing to Tactile? We'd love your help. Tactile is an open source project, built one contribution at a time by users like you. See [the CONTRIBUTING file](docs/CONTRIBUTING.md) for instructions on how to contribute.
+## How Model Rebuild Works
 
-### Previewing the theme locally
+When the user clicks **Rebuild Model** or changes a global filter, the app:
+1. validates every loaded source file,
+2. resolves logical column aliases,
+3. normalizes rows into canonical entities,
+4. applies reference-table mappings,
+5. seeds assumption defaults if assumptions are missing,
+6. matches approved rows to authorized rows,
+7. runs the planning engine,
+8. generates obligation records,
+9. generates installment and payout schedules,
+10. recomputes KPIs, variances, and warning alerts,
+11. auto-saves the current application state into IndexedDB.
 
-If you'd like to preview the theme locally (for example, in the process of proposing a change):
+## Model Readiness Rules
 
-1. Clone down the theme's repository (`git clone https://github.com/pages-themes/tactile`)
-2. `cd` into the theme's directory
-3. Run `script/bootstrap` to install the necessary dependencies
-4. Run `bundle exec jekyll serve` to start the preview server
-5. Visit [`localhost:4000`](http://localhost:4000) in your browser to preview the theme
+The app shows one of three readiness states:
+- **Ready**: all required sources are loaded with at least one valid row, required mappings are available, and there are no critical failures.
+- **Warning**: the model can build, but non-critical exceptions or partial mappings exist.
+- **Not Ready**: required sources are missing or critical validation failures exist.
 
-### Running tests
+Dependent calculations are prevented when the state is **Not Ready**.
 
-The theme contains a minimal test suite, to ensure a site with the theme would build successfully. To run the tests, simply run `script/cibuild`. You'll need to run `script/bootstrap` one before the test script will work.
+## Reference-Driven Mapping
+
+The MVP applies mappings for:
+- category,
+- budget line item,
+- O/E,
+- bonus type,
+- status,
+- installment structure.
+
+If a raw value cannot be mapped:
+- the raw value is retained,
+- the normalized value becomes `null`,
+- the row is kept,
+- an exception or validation issue is surfaced explicitly.
+
+## Matching Logic for Approved Records
+
+The app matches approved rows to authorized rows using this hierarchy:
+1. exact `bonus_identifier`
+2. exact `line_identifier`
+3. FY + category + bonus type + O/E + amount
+4. FY + category + bonus type + amount
+5. category + bonus type + amount
+6. no match
+
+Tie-breaks:
+1. identifier match beats non-identifier match
+2. same FY wins
+3. latest effective date not after approval date wins
+4. if still tied, the row is marked **Partial** with low confidence and is not auto-linked
+
+Match statuses:
+- `Matched`
+- `Partial`
+- `Unmatched`
+
+Important MVP behavior:
+- Partial and Unmatched rows remain visible in the model.
+- All Approved rows count in overall approved dollars unless filtered out by the user.
+- Partial and Unmatched rows are visible in exception tables.
+
+## KPI Definitions
+
+The UI uses these definitions:
+- **Total Authorized Dollars** = sum of valid authorized amounts under current filters.
+- **Total Projected Obligations** = projected obligations from planning under current filters.
+- **Total Actual Obligations** = sum of approved amounts for rows standardized to `Approved` under current filters.
+- **Total Projected Payouts** = projected payout schedule amounts under current filters and selected FY.
+- **Total Actual Payouts** = derived payout schedule amounts generated from actual approved records under current filters and selected FY.
+- **Remaining Headroom** = budget total minus actual obligations under current filters.
+- **Approved Takers** = count of standardized `Approved` approval rows under current filters.
+- **Future Liability** = sum of payout amounts with payout FY greater than selected FY under current filters.
+
+## Important MVP Note on Actual Payouts
+
+**Actual payouts in this MVP are derived schedules, not true payment transactions.** The payout engine creates an actual payout schedule from approved obligation records because the MVP does not yet ingest a dedicated payment transaction source.
+
+## Browser Storage Usage
+
+### IndexedDB
+Used for:
+- uploaded raw file content,
+- normalized / rebuild-ready state snapshots,
+- persisted rebuild outputs and runtime configuration.
+
+### LocalStorage
+Used for:
+- selected filters,
+- last selected page,
+- reference table edits / installment rule overrides for convenience.
+
+## How to Clear Saved State
+
+Use the **Clear Saved State** button in the top bar or on the Data Intake page. This clears IndexedDB and LocalStorage, then reloads bundled sample files.
+
+## Export Support
+
+The MVP supports:
+1. exporting the visible table to CSV,
+2. exporting the current chart to PNG,
+3. exporting the current KPI summary to CSV.
+
+## Sample Data Coverage
+
+The bundled sample files include:
+- approved records,
+- cancelled records,
+- unknown status rows,
+- matched approvals,
+- unmatched approvals,
+- lump sum structure,
+- multi-installment structure,
+- multiple categories,
+- both Officer and Enlisted rows,
+- warning / exception scenarios such as duplicate authorized rows, negative amount approval rows, unmapped or inactive line scenarios, and unmatched approvals.
+
+## Assumptions and Current Limitations
+
+- The app is static-only and has no backend.
+- The assumptions source is optional; seeded defaults appear if assumptions are missing.
+- Payment transactions are not separately loaded in the MVP.
+- Reference table editing is session-persisted in browser storage and intended for lightweight rule maintenance, not full governance workflow.
+- Excel parsing depends on client-side SheetJS loaded from a CDN.
+- CSV parsing depends on client-side PapaParse loaded from a CDN.
+- Charts and tables depend on Chart.js and Tabulator loaded from CDNs.
+- The app focuses on FY/category/OE/bonus type/status filters. Additional advanced drilldowns can be added later.
+
+## Validation Coverage
+
+The app implements validation at these levels:
+- file level,
+- column level,
+- record level,
+- model readiness level.
+
+Examples include:
+- invalid extension,
+- unreadable content,
+- required columns missing,
+- duplicate logical column mappings,
+- numeric parse failures,
+- integer parse failures,
+- invalid dates,
+- negative amount failures,
+- duplicate-key warnings,
+- unmapped critical values,
+- readiness blockers for missing required sources.
+
+## Static Technology Stack
+
+- HTML
+- CSS
+- Vanilla JavaScript modules
+- PapaParse
+- SheetJS
+- Chart.js
+- Tabulator
+
+No framework, build step, backend, or bundler is required.
