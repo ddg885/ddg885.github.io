@@ -1,4 +1,4 @@
-import { SOURCE_TYPES, MODEL_READINESS } from './modules/constants.js';
+import { SOURCE_TYPES, MODEL_READINESS, APP_TITLE, PAGE_DEFINITIONS } from './modules/constants.js';
 import { matchApprovalsToAuthorized, summarizeAuthorized } from './modules/authorization-engine.js';
 import { buildPlanningModel } from './modules/planning-engine.js';
 import { buildObligationModel } from './modules/obligation-engine.js';
@@ -10,7 +10,7 @@ import { createSourceFileRecord, detectDuplicateUpload, loadBundledSampleSourceF
 import { applyMappings } from './modules/mapping-engine.js';
 import { clearAppState, clearUiPrefs, loadAppState, loadUiPrefs, saveAppState, saveUiPrefs } from './modules/storage-manager.js';
 import { createEmptyValidatedState, buildValidationSummary, determineModelReadiness, validateAndNormalizeSourceFile } from './modules/validation-engine.js';
-import { exportCurrentChart, exportKpiSummary, exportVisibleTable } from './modules/export-manager.js';
+import { exportCurrentChart, exportHtmlSnapshot, exportKpiSummary, exportVisibleTable } from './modules/export-manager.js';
 import { nowIso } from './modules/utils.js';
 
 const initialUiPrefs = loadUiPrefs();
@@ -257,9 +257,23 @@ function wireTopBarFilterEvents() {
 function exportCurrentView() {
   const exportedTable = exportVisibleTable(renderer.currentTable, renderer.currentPageId);
   const exportedChart = exportCurrentChart(renderer.currentChart, renderer.currentPageId);
-  exportKpiSummary(renderer.currentKpis, renderer.currentPageId);
-  if (!exportedTable && !exportedChart) {
-    window.alert('No active table or chart is available on this page yet. KPI summary export still ran when available.');
+  const exportedKpis = exportKpiSummary(renderer.currentKpis, renderer.currentPageId);
+  const currentPageLabel = PAGE_DEFINITIONS.find((page) => page.id === renderer.currentPageId)?.label || renderer.currentPageId;
+  const chartDataUrl = renderer.currentChart?.toBase64Image?.('image/png', 1) || null;
+  const tableRows = renderer.currentTable?.getData?.('active') || renderer.currentTable?.getData?.() || [];
+  exportHtmlSnapshot({
+    appTitle: APP_TITLE,
+    pageTitle: currentPageLabel,
+    pageId: renderer.currentPageId,
+    readiness: state.validated.modelReadiness.status,
+    lastRebuildAt: state.runtime.lastRebuildAt,
+    filters: state.ui.filters,
+    kpis: renderer.currentKpis,
+    tableRows,
+    chartDataUrl,
+  });
+  if (!exportedTable && !exportedChart && !exportedKpis) {
+    window.alert('No active table, chart, or KPI summary is available on this page yet. An HTML snapshot export was still generated when possible.');
   }
 }
 

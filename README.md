@@ -255,7 +255,8 @@ Use the **Clear Saved State** button in the top bar or on the Data Intake page. 
 The MVP supports:
 1. exporting the visible table to CSV,
 2. exporting the current chart to PNG,
-3. exporting the current KPI summary to CSV.
+3. exporting the current KPI summary to CSV,
+4. exporting a portable `index.html` snapshot of the current view.
 
 ## Sample Data Coverage
 
