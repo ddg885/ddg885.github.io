@@ -1,0 +1,25 @@
+Reference Type,Raw Value,Standard Value,Active Flag,Effective Date,Expiration Date,Notes
+status,A,Approved,Y,2025-01-01,,Seed status mapping
+status,Approved,Approved,Y,2025-01-01,,Seed status mapping
+status,C,Cancelled,Y,2025-01-01,,Seed status mapping
+status,Cancelled,Cancelled,Y,2025-01-01,,Seed status mapping
+status,P,Pending,Y,2025-01-01,,Seed status mapping
+status,Pending,Pending,Y,2025-01-01,,Seed status mapping
+oe,O,O,Y,2025-01-01,,Officer seed
+oe,E,E,Y,2025-01-01,,Enlisted seed
+category,Aviation,Aviation,Y,2025-01-01,,Category seed
+category,Cyber,Cyber,Y,2025-01-01,,Category seed
+category,Medical,Medical,Y,2025-01-01,,Category seed
+category,Space,Space,Y,2025-01-01,,Intentional warning category
+bonus_type,Flight,Flight,Y,2025-01-01,,Bonus type seed
+bonus_type,Accession,Accession,Y,2025-01-01,,Bonus type seed
+bonus_type,Enlistment,Enlistment,Y,2025-01-01,,Bonus type seed
+bonus_type,Retention,Retention,Y,2025-01-01,,Bonus type seed
+budget_line_item,Pilot Retention,Pilot Retention,Y,2025-01-01,,Line seed
+budget_line_item,Pilot Accession,Pilot Accession,Y,2025-01-01,,Line seed
+budget_line_item,Cyber Enlistment,Cyber Enlistment,Y,2025-01-01,,Line seed
+budget_line_item,Medical Retention,Medical Retention,Y,2025-01-01,,Line seed
+budget_line_item,Orbital Retention,Orbital Retention,N,2025-01-01,,Inactive to trigger exception
+installment_structure,Lump Sum,Lump Sum,Y,2025-01-01,,Installment seed
+installment_structure,Initial + Anniversary,Initial + Anniversary,Y,2025-01-01,,Installment seed
+installment_structure,Initial + Multiple Anniversary,Initial + Multiple Anniversary,Y,2025-01-01,,Installment seed
