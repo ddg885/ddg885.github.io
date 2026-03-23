@@ -17,47 +17,32 @@ function addMonths(dateString, months) {
   return formatDate(clone);
 }
 
-/**
- * Critical payout fix:
- * - keeps internal precision across non-final installments
- * - uses final_installment_true_up so displayed installments reconcile exactly to obligation
- * - applies anniversary dates at the configured month interval (12 months by default)
- */
+/** Builds payout schedules with exact final true-up reconciliation. */
 function generateSchedule({ sourceMode, sourceRecordId, category, budgetLineItem, authorizedBonusId, totalAmount, obligationDate, installmentStructure, referenceManager }) {
   const rule = referenceManager.getInstallmentRule(installmentStructure);
-  const installmentCount = Math.max(Number(rule.installment_count || 1), 1);
-  const total = Number(totalAmount || 0);
+  const installmentCount = Number(rule.installment_count || 1);
+  const internalAmounts = [];
+  let initialAmount = totalAmount;
+  if (rule.initial_payment_type === 'percent_of_total') initialAmount = totalAmount * Number(rule.initial_payment_value || 0);
+  if (rule.initial_payment_type === 'fixed_amount') initialAmount = Math.min(totalAmount, Number(rule.initial_payment_value || 0));
+  internalAmounts.push(initialAmount);
 
-  let initialAmountInternal = total;
-  if (rule.initial_payment_type === 'percent_of_total') {
-    initialAmountInternal = total * Number(rule.initial_payment_value || 0);
-  } else if (rule.initial_payment_type === 'fixed_amount') {
-    initialAmountInternal = Math.min(total, Number(rule.initial_payment_value || 0));
-  }
-
-  const internalAmounts = [initialAmountInternal];
+  const remaining = totalAmount - initialAmount;
   const remainingInstallments = installmentCount - 1;
-  const remainingTotal = total - initialAmountInternal;
   if (remainingInstallments > 0) {
-    const perInstallmentInternal = rule.anniversary_amount_method === 'equal_remaining'
-      ? remainingTotal / remainingInstallments
-      : 0;
+    const perInstallment = rule.anniversary_amount_method === 'equal_remaining' ? remaining / remainingInstallments : 0;
     for (let index = 0; index < remainingInstallments; index += 1) {
-      internalAmounts.push(perInstallmentInternal);
+      internalAmounts.push(perInstallment);
     }
   }
 
   let displayedRunningTotal = 0;
   return internalAmounts.map((amount, index) => {
     const isFinal = index === internalAmounts.length - 1;
-    const displayedAmount = isFinal
-      ? roundCurrency(total - displayedRunningTotal)
-      : roundCurrency(amount);
+    const displayedAmount = isFinal ? roundCurrency(totalAmount - displayedRunningTotal) : roundCurrency(amount);
     displayedRunningTotal = roundCurrency(displayedRunningTotal + displayedAmount);
-    const payoutDate = index === 0
-      ? obligationDate
-      : addMonths(obligationDate, Number(rule.anniversary_interval_months || 12) * index);
-
+    const payoutDate = index === 0 ? obligationDate : addMonths(obligationDate, Number(rule.anniversary_interval_months || 12) * index);
+    const payoutFy = deriveFiscalYear(payoutDate);
     return {
       installment_record_id: uid('installment'),
       payout_record_id: uid('payout'),
@@ -70,9 +55,9 @@ function generateSchedule({ sourceMode, sourceRecordId, category, budgetLineItem
       total_installments: installmentCount,
       installment_type: index === 0 ? 'Initial' : 'Anniversary',
       payout_date: payoutDate,
-      payout_fy: deriveFiscalYear(payoutDate),
+      payout_fy: payoutFy,
       payout_amount: displayedAmount,
-      remaining_balance_after_installment: roundCurrency(Math.max(total - displayedRunningTotal, 0)),
+      remaining_balance_after_installment: roundCurrency(totalAmount - displayedRunningTotal),
       installment_structure: installmentStructure,
     };
   });

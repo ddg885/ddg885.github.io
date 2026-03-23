@@ -8,16 +8,11 @@ export function calculateInitialPaymentAmount(authorizedRow, referenceManager) {
   return roundCurrency(total * Number(rule.initial_payment_value || 0));
 }
 
-/**
- * Critical planning fix:
- * Pass 1 remains an even round-robin distribution across eligible rows,
- * stopping only when the taker target is met or the next taker would exceed budget.
- */
 export function performPass1Allocation(rows, takerTarget, categoryBudget) {
   const eligible = rows.filter((row) => row.is_valid && Number(row.authorized_amount || 0) > 0);
   const allocations = new Map(eligible.map((row) => [row.authorized_bonus_id, 0]));
   if (!eligible.length || takerTarget <= 0 || categoryBudget <= 0) {
-    return { allocations, supportableTakers: 0, budgetUsed: 0 };
+    return { allocations, supportableTakers: 0 };
   }
 
   let assigned = 0;
@@ -32,29 +27,23 @@ export function performPass1Allocation(rows, takerTarget, categoryBudget) {
       assigned += 1;
       budgetUsed = nextBudget;
       progress = true;
+      if (assigned >= takerTarget) break;
     }
     if (!progress) break;
   }
 
-  return { allocations, supportableTakers: assigned, budgetUsed };
+  return { allocations, supportableTakers: assigned };
 }
 
-/**
- * Critical planning fix:
- * Pass 2 shifts exactly one taker at a time and only accepts a move when it improves
- * abs(weighted_avg_initial - target_avg_initial) without changing total takers,
- * creating negative takers, or exceeding category budget.
- */
 export function performPass2Shift(rows, allocations, targetAvgInitialBonus, categoryBudget, referenceManager) {
-  if (targetAvgInitialBonus === null || targetAvgInitialBonus === undefined) {
-    return { allocations: new Map(allocations), shiftCount: 0, achievedAvgInitialBonus: calculateAchievedAverage(rows, allocations, referenceManager) };
+  if (!targetAvgInitialBonus) {
+    return { allocations, shiftCount: 0, achievedAvgInitialBonus: calculateAchievedAverage(rows, allocations, referenceManager) };
   }
-
   const working = new Map(allocations);
   let shiftCount = 0;
   let improved = true;
+  const maxIterations = 200;
   let iterations = 0;
-  const maxIterations = 500;
 
   while (improved && iterations < maxIterations) {
     iterations += 1;
@@ -65,29 +54,23 @@ export function performPass2Shift(rows, allocations, targetAvgInitialBonus, cate
     for (const fromRow of rows) {
       const fromCount = working.get(fromRow.authorized_bonus_id) || 0;
       if (fromCount <= 0) continue;
-
       for (const toRow of rows) {
         if (fromRow.authorized_bonus_id === toRow.authorized_bonus_id) continue;
-
-        const trial = new Map(working);
-        trial.set(fromRow.authorized_bonus_id, fromCount - 1);
-        trial.set(toRow.authorized_bonus_id, (trial.get(toRow.authorized_bonus_id) || 0) + 1);
-
-        if ((trial.get(fromRow.authorized_bonus_id) || 0) < 0) continue;
-        const trialBudgetUsed = calculateProjectedBudgetUsed(rows, trial);
-        if (trialBudgetUsed > categoryBudget + 0.01) continue;
-
-        const nextAvg = calculateAchievedAverage(rows, trial, referenceManager);
+        const nextBudget = calculateProjectedBudgetUsed(rows, working) - Number(fromRow.authorized_amount || 0) + Number(toRow.authorized_amount || 0);
+        if (nextBudget > categoryBudget + 0.01) continue;
+        const test = new Map(working);
+        test.set(fromRow.authorized_bonus_id, fromCount - 1);
+        test.set(toRow.authorized_bonus_id, (test.get(toRow.authorized_bonus_id) || 0) + 1);
+        const nextAvg = calculateAchievedAverage(rows, test, referenceManager);
         const nextDelta = Math.abs(nextAvg - targetAvgInitialBonus);
-        if (nextDelta + 0.000001 < currentDelta) {
+        if (nextDelta + 0.01 < currentDelta) {
           working.clear();
-          trial.forEach((value, key) => working.set(key, value));
+          test.forEach((value, key) => working.set(key, value));
           shiftCount += 1;
           improved = true;
           break;
         }
       }
-
       if (improved) break;
     }
   }

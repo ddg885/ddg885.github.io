@@ -2,21 +2,21 @@ import { STANDARD_STATUSES, WARNING_THRESHOLDS } from './constants.js';
 import { groupBy, roundCurrency, safeDivide } from './utils.js';
 
 export function buildExecutionModel({ authorizedSummary, approvals, planningModel, obligationModel, payoutModel, budgetRecords, selectedFy }) {
-  const approvedRows = approvals.filter((record) => record.status === 'Approved' && record.is_valid);
-  const cancelledRows = approvals.filter((record) => record.status === 'Cancelled' && record.is_valid);
+  const approvedRows = approvals.filter((record) => record.status === 'Approved');
+  const cancelledRows = approvals.filter((record) => record.status === 'Cancelled');
   const totalRelevantApprovalRows = approvals.length || 1;
-
-  // KPI consistency fix: Actual Obligations must be based directly on Approved rows, not mixed via projected/derived logic.
-  const actualObligations = roundCurrency(approvedRows.reduce((sum, row) => sum + Number(row.approved_amount || 0), 0));
-  const projectedObligations = roundCurrency(planningModel.totals.projected_obligations || 0);
+  const actualApprovedDollars = approvedRows.reduce((sum, row) => sum + Number(row.approved_amount || 0), 0);
+  const actualCancelledDollars = cancelledRows.reduce((sum, row) => sum + Math.max(Number(row.approved_amount || 0), 0), 0);
+  const projectedObligations = planningModel.totals.projected_obligations;
+  const actualObligations = obligationModel.totals.totalActualObligations;
   const budgetTotal = budgetRecords
     .filter((record) => record.is_valid && (!selectedFy || record.fy === selectedFy))
     .reduce((sum, record) => sum + Number(record.budget_amount || 0), 0);
 
   const kpis = {
     totalAuthorizedDollars: roundCurrency(authorizedSummary.totalAuthorized),
-    totalProjectedObligations: projectedObligations,
-    totalActualObligations: actualObligations,
+    totalProjectedObligations: roundCurrency(projectedObligations),
+    totalActualObligations: roundCurrency(actualObligations),
     totalProjectedPayouts: roundCurrency(payoutModel.selectedFyTotals.projectedPayouts),
     totalActualPayouts: roundCurrency(payoutModel.selectedFyTotals.actualPayouts),
     remainingHeadroom: roundCurrency(budgetTotal - actualObligations),
@@ -46,7 +46,7 @@ export function buildExecutionModel({ authorizedSummary, approvals, planningMode
       projected_takers: planRow.supportable_takers,
       actual_approved_takers: actualRows.length,
       taker_variance: actualRows.length - planRow.supportable_takers,
-      projected_obligations: roundCurrency(planRow.projected_obligations),
+      projected_obligations: planRow.projected_obligations,
       actual_obligations: roundCurrency(actualCategoryObligations),
       obligation_variance: roundCurrency(actualCategoryObligations - planRow.projected_obligations),
       projected_payouts: roundCurrency(projectedCategoryPayouts),

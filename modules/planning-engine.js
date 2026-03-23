@@ -16,16 +16,12 @@ export function buildPlanningModel({ authorizedRecords, budgetRecords, assumptio
     const assumption = assumptionsByCategory[category]?.[0] || null;
     const categoryBudget = (budgetByCategory[category] || []).reduce((sum, row) => sum + Number(row.budget_amount || 0), 0);
     const plannedNeed = Number(assumption?.planned_need || 0);
-    const takeRate = assumption?.take_rate;
-
-    // Critical planning fix: lock projected_taker_target to round(planned_need * take_rate).
-    const projectedTakerTarget = takeRate === null || takeRate === undefined
-      ? plannedNeed
-      : Math.round(plannedNeed * takeRate);
+    const takeRate = assumption?.take_rate ?? null;
+    const projectedTakerTarget = takeRate !== null && takeRate !== undefined ? Math.round(plannedNeed * takeRate) : plannedNeed;
 
     const pass1 = performPass1Allocation(rows, projectedTakerTarget, categoryBudget);
-    const pass2 = performPass2Shift(rows, pass1.allocations, assumption?.target_avg_initial_bonus ?? null, categoryBudget, referenceManager);
-    const finalTakerCount = rows.reduce((sum, row) => sum + (pass2.allocations.get(row.authorized_bonus_id) || 0), 0);
+    const pass2 = performPass2Shift(rows, pass1.allocations, assumption?.target_avg_initial_bonus, categoryBudget, referenceManager);
+    const supportableTakers = pass1.supportableTakers;
     const projectedBudgetUsed = calculateProjectedBudgetUsed(rows, pass2.allocations);
     const achievedAvgInitialBonus = calculateAchievedAverage(rows, pass2.allocations, referenceManager);
 
@@ -33,8 +29,8 @@ export function buildPlanningModel({ authorizedRecords, budgetRecords, assumptio
       fy: selectedFy,
       category,
       projected_taker_target: projectedTakerTarget,
-      supportable_takers: finalTakerCount,
-      unfunded_need: Math.max(projectedTakerTarget - finalTakerCount, 0),
+      supportable_takers: supportableTakers,
+      unfunded_need: Math.max(projectedTakerTarget - supportableTakers, 0),
       category_budget: roundCurrency(categoryBudget),
       projected_obligations: roundCurrency(projectedBudgetUsed),
       target_avg_initial_bonus: assumption?.target_avg_initial_bonus ?? null,

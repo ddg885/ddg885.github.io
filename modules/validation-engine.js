@@ -1,20 +1,13 @@
 import { MODEL_READINESS, SOURCE_SCHEMAS, SOURCE_TYPES } from './constants.js';
-import { coerceBooleanFlag, deriveFiscalYear, formatDate, parseDate, parseInteger, parseNumber, resolveColumns, sanitizeString, uid, buildLookupKey } from './utils.js';
+import { coerceBooleanFlag, deriveFiscalYear, formatDate, parseDate, parseInteger, parseNumber, resolveColumns, sanitizeString, uid, buildLookupKey, normalizeKey } from './utils.js';
 
 function baseOutput(sourceFile, rowIndex) {
   return {
     source_file_id: sourceFile.source_file_id,
     raw_row_number: rowIndex + 2,
     validation_errors: [],
-    validation_warnings: [],
     is_valid: true,
   };
-}
-
-function classifyIssue(issueText) {
-  return /duplicate/i.test(issueText) || /unmapped/i.test(issueText)
-    ? 'Warning'
-    : 'Error';
 }
 
 function parseValueByType(type, rawValue, fieldLabel, errors, { required = false, allowNegative = false } = {}) {
@@ -189,10 +182,12 @@ function applyDuplicateRules(sourceType, records) {
     const key = getKey(record);
     if (!key) return;
     if (seen.has(key)) {
-      record.validation_warnings.push('Potential duplicate key detected.');
+      record.validation_errors.push('Potential duplicate key detected.');
+      record.is_valid = false;
       const existing = seen.get(key);
-      if (!existing.validation_warnings.includes('Potential duplicate key detected.')) {
-        existing.validation_warnings.push('Potential duplicate key detected.');
+      if (!existing.validation_errors.includes('Potential duplicate key detected.')) {
+        existing.validation_errors.push('Potential duplicate key detected.');
+        existing.is_valid = false;
       }
       return;
     }
@@ -243,23 +238,13 @@ export function buildValidationSummary(validatedState) {
   const issues = [];
   Object.values(validatedState.datasets).forEach((dataset) => {
     dataset.files.forEach((file) => {
-      file.file_errors.forEach((error) => issues.push({ level: 'File', severity: classifyIssue(error), file_name: file.file_name, issue: error, source_type: file.source_type }));
+      file.file_errors.forEach((error) => issues.push({ level: 'File', file_name: file.file_name, issue: error, source_type: file.source_type }));
     });
     dataset.records.forEach((record) => {
-      record.validation_errors.forEach((error) => issues.push({ level: 'Record', severity: 'Error', source_type: dataset.sourceType, row: record.raw_row_number, issue: error, record_id: Object.values(record).find((value) => typeof value === 'string' && value.includes('-')) }));
-      (record.validation_warnings || []).forEach((warning) => issues.push({ level: 'Record', severity: 'Warning', source_type: dataset.sourceType, row: record.raw_row_number, issue: warning, record_id: Object.values(record).find((value) => typeof value === 'string' && value.includes('-')) }));
+      record.validation_errors.forEach((error) => issues.push({ level: 'Record', source_type: dataset.sourceType, row: record.raw_row_number, issue: error, record_id: Object.values(record).find((value) => typeof value === 'string' && value.includes('-')) }));
     });
   });
   return issues;
-}
-
-// Added for downstream readiness/reporting use: explicit error_count, warning_count, and exception_table.
-export function summarizeValidationIssues(validationIssues = []) {
-  return {
-    error_count: validationIssues.filter((issue) => issue.severity === 'Error').length,
-    warning_count: validationIssues.filter((issue) => issue.severity === 'Warning').length,
-    exception_table: validationIssues,
-  };
 }
 
 export function determineModelReadiness({ datasets, validationIssues, mappingIssues }) {
@@ -271,22 +256,19 @@ export function determineModelReadiness({ datasets, validationIssues, mappingIss
       reasons: [`Missing valid required sources: ${missingRequired.join(', ')}`],
     };
   }
-
-  const criticalValidationFailures = validationIssues.filter((issue) => issue.severity === 'Error');
+  const criticalValidationFailures = validationIssues.filter((issue) => /missing required column|invalid file extension|unsupported|must be numeric|must be an integer|required/i.test(issue.issue || issue));
   if (criticalValidationFailures.length) {
     return {
       status: MODEL_READINESS.NOT_READY,
-      reasons: criticalValidationFailures.slice(0, 10).map((issue) => issue.issue),
+      reasons: criticalValidationFailures.slice(0, 10).map((issue) => issue.issue || issue),
     };
   }
-
   if (mappingIssues.length || validationIssues.length) {
     return {
       status: MODEL_READINESS.WARNING,
       reasons: [...mappingIssues.slice(0, 5), ...validationIssues.slice(0, 5).map((issue) => issue.issue)],
     };
   }
-
   return {
     status: MODEL_READINESS.READY,
     reasons: [],
