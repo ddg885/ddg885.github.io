@@ -1,0 +1,9 @@
+Member ID,Status,Approval Date,Amount,Bonus Identifier,Category,Budget Line Item,O/E,Bonus Type,Installment Count,Initial Amount,Obligation Date,Payment Date,Cancellation Date,Line Identifier
+MEM-001,Approved,2025-10-10,50000,BONUS-100,Aviation,Pilot Retention,O,Flight,2,25000,2025-10-10,2025-10-10,,LINE-100
+MEM-002,C,2025-11-15,30000,BONUS-101,Aviation,Pilot Accession,O,Accession,1,30000,2025-11-15,2025-11-15,2025-12-01,LINE-101
+MEM-003,A,2026-01-12,20000,BONUS-200,Cyber,Cyber Enlistment,E,Enlistment,4,10000,2026-01-12,2026-01-12,,LINE-200
+MEM-004,,2026-02-05,15000,,Cyber,Cyber Enlistment,E,Enlistment,4,7500,2026-02-05,2026-02-05,,
+MEM-005,Pending,2026-03-22,40000,BONUS-300,Medical,Medical Retention,O,Retention,2,20000,2026-03-22,2026-03-22,,LINE-300
+MEM-006,Approved,2026-04-18,50000,,Aviation,Pilot Retention,O,Flight,2,25000,2026-04-18,2026-04-18,,LINE-999
+MEM-007,Approved,2026-06-01,25000,,Space,Orbital Retention,O,Retention,2,12500,2026-06-01,2026-06-01,,LINE-777
+MEM-008,Approved,2026-06-01,-5000,,Cyber,Cyber Enlistment,E,Enlistment,4,1000,2026-06-01,2026-06-01,,LINE-200
